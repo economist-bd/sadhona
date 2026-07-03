@@ -1,0 +1,6 @@
+{
+  "name": "Sadhana",
+  "description": "An Android app filled with study advices, tips, and guidelines for students to increase focus and motivation, featuring reactions, comments, sharing, and an AI Study Coach.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

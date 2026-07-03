@@ -1,0 +1,42 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Glowing background aura -->
+    <path
+        android:fillColor="#004D40"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"
+        android:fillAlpha="0.15" />
+    
+    <!-- Open Book Left Page -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M51,68 C44,61 34,61 24,63 L24,35 C34,33 44,33 51,40 Z" />
+
+    <!-- Open Book Right Page -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M57,68 C64,61 74,61 84,63 L84,35 C74,33 64,33 57,40 Z" />
+
+    <!-- Spine/Center of Book -->
+    <path
+        android:fillColor="#E0F2F1"
+        android:pathData="M52,40 L56,40 L56,69 L52,69 Z" />
+
+    <!-- Glowing Bulb/Light representing Focus or Sadhana above the book -->
+    <path
+        android:fillColor="#FFF59D"
+        android:pathData="M54,20 C50,20 48,23 48,26 C48,29 51,30 52,32 L56,32 C57,30 60,29 60,26 C60,23 58,20 54,20 Z" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M52.5,32 L55.5,32 L55,34 L53,34 Z" />
+
+    <!-- Sparkles of motivation -->
+    <path
+        android:fillColor="#FFF59D"
+        android:pathData="M34,22 L36,25 L39,22 L36,19 Z" />
+    <path
+        android:fillColor="#FFF59D"
+        android:pathData="M74,22 L76,25 L79,22 L76,19 Z" />
+</vector>
