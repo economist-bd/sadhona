@@ -1,9 +1,8 @@
-name: Android Build & Release
+name: Play Store AAB Build
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
   build:
@@ -23,17 +22,23 @@ jobs:
     - name: Generate Gradle Wrapper
       run: gradle wrapper
 
-    - name: Generate dummy debug.keystore
-      run: keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+    - name: Generate Production Keystore
+      run: keytool -genkey -v -keystore release.keystore -storepass Sadhana2026 -alias sadhanakey -keypass Sadhana2026 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Md. Monjurul Haque, OU=MH Academy, O=MH Academy, L=Kishoreganj, S=Dhaka, C=BD"
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+    - name: Build Release AAB for Play Store
+      run: ./gradlew bundleRelease -x lint -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/release.keystore -Pandroid.injected.signing.store.password=Sadhana2026 -Pandroid.injected.signing.key.alias=sadhanakey -Pandroid.injected.signing.key.password=Sadhana2026
 
-    - name: Upload APK
+    - name: Upload Play Store AAB
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: PlayStore-Release-AAB
+        path: app/build/outputs/bundle/release/app-release.aab
+
+    - name: Upload Keystore Backup (KEEP SAFE)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Important-Keystore-Backup
+        path: release.keystore
