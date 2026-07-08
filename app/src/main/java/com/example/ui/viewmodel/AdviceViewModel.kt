@@ -20,10 +20,32 @@ data class CoachMessage(
 
 class AdviceViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: AdviceRepository
+    
+    private val _dailyMotivation = MutableStateFlow<AdviceEntity?>(null)
+    val dailyMotivation: StateFlow<AdviceEntity?> = _dailyMotivation.asStateFlow()
 
     init {
         val database = AppDatabase.getDatabase(application, viewModelScope)
         repository = AdviceRepository(database.adviceDao())
+        
+        // Load daily motivation once data is available
+        viewModelScope.launch {
+            repository.allAdvices
+                .filter { it.isNotEmpty() }
+                .firstOrNull()?.let { list ->
+                    _dailyMotivation.value = list.randomOrNull()
+                }
+        }
+    }
+
+    fun refreshDailyMotivation() {
+        viewModelScope.launch {
+            repository.allAdvices
+                .filter { it.isNotEmpty() }
+                .firstOrNull()?.let { list ->
+                    _dailyMotivation.value = list.randomOrNull()
+                }
+        }
     }
 
     val categories = listOf(
@@ -161,7 +183,7 @@ class AdviceViewModel(application: Application) : AndroidViewModel(application) 
         listOf(
             CoachMessage(
                 sender = "coach",
-                text = "স্বাগতম শিক্ষার্থী! আমি তোমার 'সাদনা স্টাডি কোচ'। পড়াশোনায় মনোযোগ বাড়ানো, রুটিন তৈরি, সামাজিক মাধ্যমের আসক্তি কমানো বা যেকোনো পড়াশোনা সংক্রান্ত সমস্যায় আমাকে জিজ্ঞেস করো। আমি তোমাকে প্রয়োজনীয় উপদেশ দেব।"
+                text = "স্বাগতম শিক্ষার্থী! আমি তোমার 'সাধনা স্টাডি কোচ'। পড়াশোনায় মনোযোগ বাড়ানো, রুটিন তৈরি, সামাজিক মাধ্যমের আসক্তি কমানো বা যেকোনো পড়াশোনা সংক্রান্ত সমস্যায় আমাকে জিজ্ঞেস করো। আমি তোমাকে প্রয়োজনীয় উপদেশ দেব।"
             )
         )
     )

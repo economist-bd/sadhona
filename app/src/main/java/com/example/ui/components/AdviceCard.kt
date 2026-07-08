@@ -303,7 +303,7 @@ fun shareAdvice(context: Context, text: String, category: String) {
             
             "$text"
             
-            — সংগৃহীত (সাদনা অ্যাপ থেকে)
+            — সংগৃহীত (সাধনা অ্যাপ থেকে)
             """.trimIndent()
         )
     }

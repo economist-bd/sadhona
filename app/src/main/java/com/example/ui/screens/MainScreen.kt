@@ -15,6 +15,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,13 +50,14 @@ fun MainScreen(
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
     val activeAdviceId by viewModel.activeAdviceId.collectAsStateWithLifecycle()
     val comments by viewModel.currentComments.collectAsStateWithLifecycle()
+    val dailyMotivation by viewModel.dailyMotivation.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
     var isAddDialogOpen by remember { mutableStateOf(false) }
 
     // Selected advice for comment sheet
-    val activeAdvice = remember(activeAdviceId, advices) {
-        advices.find { it.id == activeAdviceId }
+    val activeAdvice = remember(activeAdviceId, advices, dailyMotivation) {
+        advices.find { it.id == activeAdviceId } ?: if (dailyMotivation?.id == activeAdviceId) dailyMotivation else null
     }
 
     // Filtered advices by search query
@@ -224,6 +230,27 @@ fun MainScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
+                        if (searchQuery.isBlank() && selectedCategory == "সকল উপদেশ") {
+                            dailyMotivation?.let { daily ->
+                                item(key = "daily_motivation_section") {
+                                    DailyMotivationCard(
+                                        advice = daily,
+                                        onRefreshClick = { viewModel.refreshDailyMotivation() },
+                                        onLikeClick = { viewModel.toggleLike(daily) },
+                                        onCommentClick = { viewModel.selectAdviceForComments(daily.id) }
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "সকল গাইডলাইন ও টিপস",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+
                         items(
                             items = filteredAdvices,
                             key = { it.id }
@@ -287,6 +314,144 @@ fun MainScreen(
                 onDeleteComment = { viewModel.deleteComment(it) },
                 onDismiss = { viewModel.selectAdviceForComments(null) }
             )
+        }
+    }
+}
+
+@Composable
+fun DailyMotivationCard(
+    advice: AdviceEntity,
+    onRefreshClick: () -> Unit,
+    onLikeClick: () -> Unit,
+    onCommentClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("daily_motivation_card"),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = "দিনের সেরা উপদেশ",
+                        tint = Color(0xFFFFB300),
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text = "আজকের বিশেষ অনুপ্রেরণা",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                
+                // Shuffle / Refresh button
+                IconButton(
+                    onClick = onRefreshClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "পরিবর্তন করুন",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = "“${advice.text}”",
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Category Tag
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = advice.category,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                // Action buttons (Like, Comment) to interact with daily motivation
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Likes
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onLikeClick() }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (advice.liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "পছন্দ করুন",
+                            tint = if (advice.liked) Color.Red else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = advice.likesCount.toString(),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    // Comments
+                    IconButton(
+                        onClick = onCommentClick,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ChatBubbleOutline,
+                            contentDescription = "মন্তব্য করুন",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

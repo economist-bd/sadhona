@@ -8,7 +8,7 @@ data class AdviceEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val text: String,
     val category: String,
-    val author: String = "সাদনা কোচ",
+    val author: String = "সাধনা কোচ",
     val likesCount: Int = 0,
     val liked: Boolean = false,
     val thumbed: Boolean = false,
